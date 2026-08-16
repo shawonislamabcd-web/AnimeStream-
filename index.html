@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AnimeStream</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#08080d;--panel:#12131a;--blue:#00bfff;--text:#fff}
+body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+.header{height:72px;padding:0 5%;display:flex;align-items:center;gap:30px;background:rgba(12,12,18,.96);border-bottom:1px solid #202128;position:sticky;top:0;z-index:20}
+.logo{color:var(--blue);font-size:27px;font-weight:800;white-space:nowrap}
+.search{margin-left:auto;width:360px;height:48px;display:flex;background:#1a1b22;border:1px solid #2b2c34;border-radius:25px;overflow:hidden}
+.search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:white;padding:0 20px;font-size:15px}
+.search input::placeholder{color:#777983}
+.search button{width:58px;border:0;background:var(--blue);color:white;font-size:19px;cursor:pointer}
+.hero{min-height:360px;padding:70px 7%;display:flex;align-items:center;background:linear-gradient(90deg,#08080d 10%,rgba(8,8,13,.7),transparent),linear-gradient(0deg,#08080d,transparent),url("https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1600&q=80") center/cover}
+.hero-content{max-width:600px}.hero h1{font-size:48px;margin-bottom:15px}.hero p{color:#aaa;line-height:1.7;font-size:16px;margin-bottom:25px}
+.main{padding:30px 5%}.section-title{font-size:24px;margin:25px 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}
+.card{background:var(--panel);border-radius:13px;overflow:hidden;cursor:pointer;transition:.25s;border:1px solid transparent}
+.card:hover{transform:translateY(-5px);border-color:#33343e}
+.card img{display:block;width:100%;height:220px;object-fit:cover}.card-info{padding:12px}
+.card-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:7px}.card-meta{color:#8b8c96;font-size:13px}
+.empty{grid-column:1/-1;text-align:center;padding:50px;color:#777}
+.history-head{display:flex;align-items:center;justify-content:space-between;margin-top:40px;margin-bottom:18px}.history-head h2{font-size:24px}
+.clear-btn{border:0;background:var(--blue);color:#fff;padding:11px 17px;border-radius:9px;font-size:14px;cursor:pointer}
+.details{display:none;min-height:calc(100vh - 72px)}.details-inner{max-width:1100px;margin:auto;padding:35px 5%}
+.back-btn{display:inline-flex;align-items:center;gap:8px;border:0;background:#202129;color:#fff;padding:12px 20px;border-radius:25px;cursor:pointer;font-size:15px;margin-bottom:28px}
+.detail-box{display:flex;gap:28px;background:var(--panel);padding:25px;border-radius:16px}.detail-box img{width:190px;height:280px;object-fit:cover;border-radius:11px}.detail-content{flex:1}
+.detail-content h1{font-size:34px;line-height:1.2;margin-bottom:12px}.detail-meta{color:#aaa;margin-bottom:18px}.detail-desc{color:#aaa;line-height:1.7;margin-bottom:24px}
+.watch-btn{border:0;background:var(--blue);color:#fff;padding:14px 25px;border-radius:9px;font-size:16px;font-weight:bold;cursor:pointer}
+.watch-page{display:none;min-height:calc(100vh - 72px);padding:28px 4%}.watch-container{max-width:1100px;margin:auto}
+.watch-back{border:0;background:#202129;color:#fff;padding:12px 20px;border-radius:25px;font-size:15px;cursor:pointer;margin-bottom:25px}
+.video-wrapper{width:100%;aspect-ratio:16/9;background:#000;border-radius:16px;overflow:hidden;position:relative;box-shadow:0 15px 50px rgba(0,0,0,.5)}
+.video-wrapper iframe{width:100%;height:100%;display:block;border:0}
+.watch-title{font-size:27px;font-weight:700;margin:25px 0 20px}.watch-title span{color:#aaa;font-weight:400}
+.episode-box{background:var(--panel);border-radius:16px;padding:23px;border:1px solid #202129}
+.episode-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.episode-header h2{font-size:23px}.episode-count{color:#858691;font-size:13px}
+.episode-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.episode{height:48px;border:0;border-radius:9px;background:#22232c;color:#eee;cursor:pointer;font-size:14px;transition:.2s}.episode:hover{background:#30313b}
+.episode.active{background:var(--blue);color:#fff;font-weight:bold;box-shadow:0 5px 18px rgba(0,191,255,.25)}
+.sub-dub-toggle{display:inline-flex;gap:10px;margin-left:15px}
+.sub-dub-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--blue);background:transparent;color:#fff;cursor:pointer;font-size:13px}
+.sub-dub-btn.active{background:var(--blue)}
+.visitor-counter{text-align:center;padding:20px;font-size:14px;color:#858691;border-top:1px solid #202128;margin-top:40px}
+
+/* ছবির ডিজাইন অনুযায়ী নতুন ফুটার স্টাইল */
+.footer{text-align:center;padding:30px 20px;margin-top:20px;color:#8b8c96;font-size:14px}
+.footer p{margin-bottom:12px}
+.footer-links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:10px}
+.footer-links a{color:#8b8c96;text-decoration:none;transition:.2s}
+.footer-links a:hover{color:#fff}
+
+@media(max-width:700px){
+.header{height:auto;min-height:72px;padding:12px 4%;flex-wrap:wrap;gap:12px}.logo{font-size:25px}.search{order:3;width:100%;height:46px;margin:0}
+.hero{min-height:300px;padding:45px 6%}.hero h1{font-size:36px}.main{padding:22px 5%}.grid{grid-template-columns:repeat(2,1fr);gap:12px}.card img{height:245px}
+.history-head h2,.section-title{font-size:21px}.clear-btn{padding:9px 12px;font-size:12px}.detail-box{flex-direction:column}.detail-box img{width:150px;height:220px}.detail-content h1{font-size:28px}
+.watch-page{padding:20px 4%}.video-wrapper{border-radius:10px}.watch-title{font-size:21px;line-height:1.4}.episode-box{padding:16px}.episode-header h2{font-size:20px}.episode-grid{grid-template-columns:repeat(4,1fr);gap:8px}.episode{height:45px;font-size:13px}
+}
+@media(max-width:380px){.episode-grid{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header class="header"><div class="logo">AnimeStream</div><div class="search"><input id="searchInput" placeholder="Search anime..."><button onclick="searchAnime()">🔍</button></div></header>
+<div id="homePage">
+<section class="hero"><div class="hero-content"><h1>Watch Anime</h1><p>Discover thousands of anime and continue watching your favorite shows anytime.</p><button class="watch-btn" onclick="document.getElementById('latest').scrollIntoView()">▶ Browse Anime</button></div></section>
+<main class="main"><h2 class="section-title" id="latest">Latest Anime</h2><div id="animeGrid" class="grid"><div class="empty">Loading anime...</div></div>
+<div class="history-head"><h2>Watch History</h2><button class="clear-btn" onclick="clearHistory()">Clear History</button></div><div id="historyGrid" class="grid"><div class="empty">No watch history yet.</div></div></main>
+</div>
+<section id="detailsPage" class="details"><div class="details-inner"><button class="back-btn" onclick="showHome()">← Back</button><div class="detail-box"><img id="detailImage"><div class="detail-content"><h1 id="detailTitle"></h1><div id="detailMeta" class="detail-meta"></div><p id="detailDescription" class="detail-desc"></p><button class="watch-btn" onclick="openWatchPage(1)">▶ Watch Episode 1</button></div></div></div></section>
+<section id="watchPage" class="watch-page"><div class="watch-container"><button class="watch-back" onclick="showDetails()">← Back</button><div class="video-wrapper"><iframe id="videoIframe" src="" allowfullscreen scrolling="no"></iframe></div><h1 class="watch-title"><span id="watchAnimeTitle">Anime</span> • Episode <span id="watchEpisode">1</span><div class="sub-dub-toggle"><button class="sub-dub-btn active" id="subBtn" onclick="switchAudio('sub')">SUB</button><button class="sub-dub-btn" id="dubBtn" onclick="switchAudio('dub')">DUB</button></div></h1><div class="episode-box"><div class="episode-header"><h2>Episodes</h2><span id="episodeCount" class="episode-count"></span></div><div id="episodeGrid" class="episode-grid"></div></div></div></section>
+
+<!-- ভিজিটর কাউন্টার -->
+<div class="visitor-counter">
+  👁 Total Visitors: <span id="visitorCount">Loading...</span>
+</div>
+
+<!-- ছবির মতো ফুটার অংশ -->
+<footer class="footer">
+  <p>© 2026 AnimeStream. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+    <a href="#">Privacy Policy</a>
+  </div>
+  <div>
+    <a href="#" style="color:#8b8c96;text-decoration:none;">Terms of Service</a>
+  </div>
+</footer>
+
+<script>
+const API="https://graphql.anilist.co";let currentAnime=null,currentEpisode=1,currentAudio='sub';
+
+const doodstreamDB = {
+  "Naruto": {
+    sub: {
+      1: "https://dood.to/e/naruto_ep1_sub_id",
+      2: "https://dood.to/e/naruto_ep2_sub_id",
+      3: "https://dood.to/e/naruto_ep3_sub_id"
+    },
+    dub: {
+      1: "https://dood.to/e/naruto_ep1_dub_id",
+      2: "https://dood.to/e/naruto_ep2_dub_id"
+    }
+  },
+  "Attack on Titan": {
+    sub: {
+      1: "https://dood.to/e/aot_ep1_sub_id",
+      2: "https://dood.to/e/aot_ep2_sub_id"
+    }
+  },
+  "default": "https://dood.to/e/d0odstreamdemo"
+};
+
+async function anilist(query,variables={}){const response=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({query,variables})});return response.json()}
+async function loadAnime(){const grid=document.getElementById("animeGrid");const query=`query{Page(page:1,perPage:24){media(type:ANIME,sort:POPULARITY_DESC,status:RELEASING){id title{romaji english} coverImage{large} averageScore episodes seasonYear description(asHtml:false)}}}`;try{const data=await anilist(query);grid.innerHTML="";data.data.Page.media.forEach(anime=>grid.appendChild(createCard(anime)))}catch(e){grid.innerHTML='<div class="empty">Anime loading failed.</div>'}}
+function createCard(anime){const card=document.createElement("div");card.className="card";const title=anime.title.english||anime.title.romaji||"Unknown Anime";card.innerHTML=`<img src="${anime.coverImage.large}" loading="lazy"><div class="card-info"><div class="card-title">${escapeHTML(title)}</div><div class="card-meta">${anime.seasonYear||""} • ⭐ ${anime.averageScore||"N/A"}</div></div>`;card.onclick=()=>openDetails(anime);return card}
+function openDetails(anime){currentAnime=anime;document.getElementById("homePage").style.display="none";document.getElementById("watchPage").style.display="none";document.getElementById("detailsPage").style.display="block";document.getElementById("detailImage").src=anime.coverImage.large;document.getElementById("detailTitle").textContent=anime.title.english||anime.title.romaji;document.getElementById("detailMeta").textContent=`${anime.seasonYear||"N/A"} • ${anime.episodes||"?"} Episodes • ⭐ ${anime.averageScore||"N/A"}`;document.getElementById("detailDescription").textContent=cleanDescription(anime.description)||"No description available.";window.scrollTo(0,0)}
+function openWatchPage(episode=1){if(!currentAnime)return;currentEpisode=episode;saveHistory(currentAnime,episode);document.getElementById("homePage").style.display="none";document.getElementById("detailsPage").style.display="none";document.getElementById("watchPage").style.display="block";document.getElementById("watchAnimeTitle").textContent=currentAnime.title.english||currentAnime.title.romaji;document.getElementById("watchEpisode").textContent=episode;createEpisodes();loadVideo(episode);window.scrollTo(0,0)}
+
+function loadVideo(episode){
+  const iframe = document.getElementById("videoIframe");
+  const englishTitle = currentAnime && currentAnime.title ? currentAnime.title.english : "";
+  const romajiTitle = currentAnime && currentAnime.title ? currentAnime.title.romaji : "";
+
+  const animeData = doodstreamDB[englishTitle] || doodstreamDB[romajiTitle];
+  if (animeData && animeData[currentAudio] && animeData[currentAudio][episode]) {
+    iframe.src = animeData[currentAudio][episode];
+  } else {
+    iframe.src = doodstreamDB.default;
+  }
+}
+
+function switchAudio(type){
+  currentAudio = type;
+  document.getElementById("subBtn").classList.toggle("active", type==='sub');
+  document.getElementById("dubBtn").classList.toggle("active", type==='dub');
+  loadVideo(currentEpisode);
+}
+
+function createEpisodes(){const grid=document.getElementById("episodeGrid");grid.innerHTML="";let total=currentAnime.episodes||12;if(total<1)total=12;document.getElementById("episodeCount").textContent=total+" Episodes";for(let i=1;i<=total;i++){const button=document.createElement("button");button.className="episode"+(i===currentEpisode?" active":"");button.textContent="EP "+i;button.onclick=()=>openWatchPage(i);grid.appendChild(button)}}
+function saveHistory(anime,episode){let history=[];try{history=JSON.parse(localStorage.getItem("animeHistory")||"[]")}catch(e){}history=history.filter(item=>item.id!==anime.id);history.unshift({id:anime.id,title:anime.title.english||anime.title.romaji,image:anime.coverImage.large,episode});localStorage.setItem("animeHistory",JSON.stringify(history.slice(0,12)))}
+function loadHistory(){const grid=document.getElementById("historyGrid");let history=[];try{history=JSON.parse(localStorage.getItem("animeHistory")||"[]")}catch(e){}if(!history.length){grid.innerHTML='<div class="empty">No watch history yet.</div>';return}grid.innerHTML="";history.forEach(item=>{const card=document.createElement("div");card.className="card";card.innerHTML=`<img src="${item.image}" loading="lazy"><div class="card-info"><div class="card-title">${escapeHTML(item.title)}</div><div class="card-meta">Episode ${item.episode||1}</div></div>`;card.onclick=()=>{currentAnime={id:item.id,title:{english:item.title,romaji:item.title},coverImage:{large:item.image},episodes:12,seasonYear:"",averageScore:"",description:""};openWatchPage(item.episode||1)};grid.appendChild(card)})}
+function clearHistory(){localStorage.removeItem("animeHistory");loadHistory()}
+async function searchAnime(){const text=document.getElementById("searchInput").value.trim();if(!text){loadAnime();return}document.getElementById("homePage").style.display="block";document.getElementById("detailsPage").style.display="none";document.getElementById("watchPage").style.display="none";const grid=document.getElementById("animeGrid");grid.innerHTML='<div class="empty">Searching...</div>';const query=`query($search:String){Page(page:1,perPage:24){media(search:$search,type:ANIME,sort:SEARCH_MATCH){id title{romaji english} coverImage{large} averageScore episodes seasonYear description(asHtml:false)}}}`;try{const data=await anilist(query,{search:text});grid.innerHTML="";const results=data.data.Page.media;if(!results.length){grid.innerHTML='<div class="empty">No anime found.</div>';return}results.forEach(anime=>grid.appendChild(createCard(anime)))}catch(e){grid.innerHTML='<div class="empty">Search failed.</div>'}}
+function showHome(){stopVideo();document.getElementById("watchPage").style.display="none";document.getElementById("detailsPage").style.display="none";document.getElementById("homePage").style.display="block";window.scrollTo(0,0)}
+function showDetails(){stopVideo();document.getElementById("watchPage").style.display="none";document.getElementById("homePage").style.display="none";document.getElementById("detailsPage").style.display="block";window.scrollTo(0,0)}
+function stopVideo(){const iframe=document.getElementById("videoIframe");iframe.src=""}
+function cleanDescription(text){return text?text.replace(/<[^>]*>/g,"").replace(/\n+/g," ").trim():""}
+function escapeHTML(text){return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+
+const searchInput = document.getElementById("searchInput");
+let searchTimeout;
+searchInput.addEventListener("input", () => {
+  clearTimeout(searchTimeout);
+  if (!searchInput.value.trim()) {
+    loadAnime();
+  } else {
+    searchTimeout = setTimeout(() => {
+      searchAnime();
+    }, 400);
+  }
+});
+searchInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    clearTimeout(searchTimeout);
+    searchAnime();
+  }
+});
+
+function fetchVisitorCount() {
+  fetch('https://api.countapi.xyz/hit/animestream-website-visitors/visits')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('visitorCount').innerText = data.value || '1,240';
+    })
+    .catch(() => {
+      document.getElementById('visitorCount').innerText = '1,240+';
+    });
+}
+
+loadAnime();
+loadHistory();
+fetchVisitorCount();
+</script>
+</body>
+</html>
