@@ -263,24 +263,23 @@ searchInput.addEventListener("input", () => {
 });
 searchInput.addEventListener("keydown", e => { if (e.key === "Enter") { clearTimeout(searchTimeout); searchAnime(); } });
 
-function fetchVisitorCount() {
-  fetch('https://counterapi.com/api/animestream-website-visitors/visits')
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('visitorCount').innerText = data.value || '1,240';
-    })
-    .catch(() => {
-      // API কাজ না করলে fallback সার্ভিস হিসেবে এটি কাজ করবে
-      fetch('https://api.hitvis.com/hit?page=animestream-website-unique')
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById('visitorCount').innerText = data.count || '1,240';
-        })
-        .catch(() => {
-          document.getElementById('visitorCount').innerText = '1,240+';
-        });
-    });
+async function fetchVisitorCount() {
+  const el = document.getElementById('visitorCount');
+  try {
+    const res = await fetch('https://counterapi.com/api/animestream-website-visitors/visits');
+    const data = await res.json();
+    el.innerText = data.value || '1,240';
+  } catch (e) {
+    try {
+      const resFallback = await fetch('https://api.hitvis.com/hit?page=animestream-website-unique');
+      const dataFallback = await resFallback.json();
+      el.innerText = dataFallback.count || '1,240';
+    } catch (err) {
+      el.innerText = '1,240+';
+    }
+  }
 }
+  
                                                                                                                                                                                                                                 }
                                                                             
 loadAnime();
