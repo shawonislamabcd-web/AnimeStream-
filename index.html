@@ -264,11 +264,24 @@ searchInput.addEventListener("input", () => {
 searchInput.addEventListener("keydown", e => { if (e.key === "Enter") { clearTimeout(searchTimeout); searchAnime(); } });
 
 function fetchVisitorCount() {
-  fetch('https://api.countapi.xyz/hit/animestream-website-visitors/visits')
-    .then(res => res.json()).then(data => { document.getElementById('visitorCount').innerText = data.value || '1,240'; })
-    .catch(() => { document.getElementById('visitorCount').innerText = '1,240+'; });
-}
-
+  fetch('https://counterapi.com/api/animestream-website-visitors/visits')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('visitorCount').innerText = data.value || '1,240';
+    })
+    .catch(() => {
+      // API কাজ না করলে fallback সার্ভিস হিসেবে এটি কাজ করবে
+      fetch('https://api.hitvis.com/hit?page=animestream-website-unique')
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('visitorCount').innerText = data.count || '1,240';
+        })
+        .catch(() => {
+          document.getElementById('visitorCount').innerText = '1,240+';
+        });
+    });
+                                                                                                                                                                                                                                }
+                                                                            
 loadAnime();
 loadHistory();
 fetchVisitorCount();
