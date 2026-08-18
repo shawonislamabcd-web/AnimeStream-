@@ -263,24 +263,21 @@ searchInput.addEventListener("input", () => {
 });
 searchInput.addEventListener("keydown", e => { if (e.key === "Enter") { clearTimeout(searchTimeout); searchAnime(); } });
 
-async function fetchVisitorCount() {
-  const el = document.getElementById('visitorCount');
+function fetchVisitorCount() {
   try {
-    const res = await fetch('https://counterapi.com/api/animestream-website-visitors/visits');
-    const data = await res.json();
-    el.innerText = data.value || '1,240';
-  } catch (e) {
-    try {
-      const resFallback = await fetch('https://api.hitvis.com/hit?page=animestream-website-unique');
-      const dataFallback = await resFallback.json();
-      el.innerText = dataFallback.count || '1,240';
-    } catch (err) {
-      el.innerText = '1,240+';
+    let visits = localStorage.getItem("site_visits");
+    if (!visits) {
+      visits = 1240;
+    } else {
+      visits = parseInt(visits) + 1;
     }
+    localStorage.setItem("site_visits", visits);
+    document.getElementById('visitorCount').innerText = visits;
+  } catch (e) {
+    document.getElementById('visitorCount').innerText = '1,240+';
   }
-}
-  
-                                                                                                                                                                                                                                }
+  }
+  }
                                                                             
 loadAnime();
 loadHistory();
