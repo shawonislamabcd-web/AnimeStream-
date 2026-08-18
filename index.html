@@ -264,19 +264,16 @@ searchInput.addEventListener("input", () => {
 searchInput.addEventListener("keydown", e => { if (e.key === "Enter") { clearTimeout(searchTimeout); searchAnime(); } });
 
 function fetchVisitorCount() {
-  try {
-    let visits = localStorage.getItem("site_visits");
-    if (!visits) {
-      visits = 1240;
-    } else {
-      visits = parseInt(visits) + 1;
-    }
-    localStorage.setItem("site_visits", visits);
-    document.getElementById('visitorCount').innerText = visits;
-  } catch (e) {
-    document.getElementById('visitorCount').innerText = '1,240+';
-  }
-  }
+  fetch('https://api.hitvis.com/hit?page=animestream_unique_page_2026')
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.count) {
+        document.getElementById('visitorCount').innerText = Number(data.count).toLocaleString();
+      }
+    })
+    .catch(() => {
+      // API না পেলেও যেন পেজ না আটকায়
+    });
   }
                                                                             
 loadAnime();
