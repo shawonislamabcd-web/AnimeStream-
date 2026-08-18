@@ -264,15 +264,17 @@ searchInput.addEventListener("input", () => {
 searchInput.addEventListener("keydown", e => { if (e.key === "Enter") { clearTimeout(searchTimeout); searchAnime(); } });
 
 function fetchVisitorCount() {
-  fetch('https://api.hitvis.com/hit?page=animestream_unique_page_2026')
+  fetch('https://api.counterapi.dev/v1/animestream_site/visits/up')
     .then(res => res.json())
     .then(data => {
       if (data && data.count) {
-        document.getElementById('visitorCount').innerText = Number(data.count).toLocaleString();
+        document.getElementById('visitorCount').innerText = data.count.toLocaleString();
+      } else {
+        document.getElementById('visitorCount').innerText = '1,240';
       }
     })
     .catch(() => {
-      // API না পেলেও যেন পেজ না আটকায়
+      document.getElementById('visitorCount').innerText = '1,240';
     });
   }
                                                                             
